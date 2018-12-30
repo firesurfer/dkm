@@ -13,8 +13,6 @@
 #include <tuple>
 #include <type_traits>
 #include <vector>
-
-#include <iostream>
 /*
 DKM - A k-means implementation that is generic across variable data dimensions.
 */
@@ -144,11 +142,9 @@ std::vector<std::vector<T>> calculate_means(const std::vector<std::vector<T>>& d
 	const std::vector<uint32_t>& clusters,
     const std::vector<std::vector<T>>& old_means,
 	uint32_t k) {
-    std::vector<std::vector<T>> means(k);
-    for(auto & mean:means)
-    {
-        mean.resize(data[0].size(),0);
-    }
+	size_t size = data[0].size();
+    std::vector<std::vector<T>> means(k, std::vector<T>(size,0));
+
 	std::vector<T> count(k, T());
 	for (size_t i = 0; i < std::min(clusters.size(), data.size()); ++i) {
 		auto& mean = means[clusters[i]];
