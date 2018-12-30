@@ -24,7 +24,7 @@ This is just simple test harness without any external dependencies.
 const lest::test specification[] = {
 	CASE("Small 2D dataset is successfully segmented into 3 clusters",) {
 		SETUP("Small 2D dataset") {
-			std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
+            std::vector<std::vector<float>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
 			uint32_t k = 3;
 			
 			SECTION("Distance squared calculated correctly") {
@@ -57,7 +57,7 @@ const lest::test specification[] = {
 				// verify results
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}};
+                std::vector<std::vector<float>> expected_means{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}};
 				std::sort(means.begin(), means.end());
 				EXPECT(means == expected_means);
 				// Can't verify clusters easily because order may differ from run to run
@@ -72,7 +72,7 @@ const lest::test specification[] = {
 
 	CASE("Test dkm::get_cluster",) {
 		SETUP() {
-			std::vector<std::array<double, 2>> points{
+            std::vector<std::vector<double>> points{
 				{0, 0},
 				{1, 1},
 				{2, 2},
@@ -89,7 +89,7 @@ const lest::test specification[] = {
 
 				SECTION("Correct points for existing labels") {
 					auto cluster = dkm::get_cluster(points, labels, 0);
-					std::vector<std::array<double, 2>> res{
+                    std::vector<std::vector<double>> res{
 						{0, 0},
 							{4, 4},
 							{9, 9}
@@ -116,24 +116,24 @@ const lest::test specification[] = {
 
 				SECTION("Empty set of points for non-existing labels") {
 					auto cluster = dkm::get_cluster(points, labels, 4);
-					std::vector<std::array<double, 2>> empty;
+                    std::vector<std::vector<double>> empty;
 					EXPECT(cluster == empty);
 				}
 			}
 
 			SECTION("Empty points and labels") {
-				std::vector<std::array<double, 2>> points;
+                std::vector<std::vector<double>> points;
 				std::vector<uint32_t> labels;
 
 				SECTION("Empty set of points") {
 					auto cluster = dkm::get_cluster(points, labels, 0);
-					std::vector<std::array<double, 2>> empty;
+                    std::vector<std::vector<double>> empty;
 					EXPECT(cluster == empty);
 				}
 			}
 
 			SECTION("points and labels sequences with different sizes") {
-				std::vector<std::array<double, 2>> points{
+                std::vector<std::vector<double>> points{
 					{0, 1},
 					{2, 3.5}
 				};
@@ -144,7 +144,7 @@ const lest::test specification[] = {
 
 	CASE("Test dkm::dist_to_center",) {
 		SETUP() {
-			std::vector<std::array<double, 2>> points{
+            std::vector<std::vector<double>> points{
 				{1, 5},
 				{2.2, 3},
 				{8, 12},
@@ -152,7 +152,7 @@ const lest::test specification[] = {
 				{0.27, 50},
 				{1, 1}
 			};
-			std::array<double, 2> center{17.2, 24.5};
+            std::vector<double> center{17.2, 24.5};
 
 			std::vector<double> res{25.3513, 26.2154, 15.5206, 20.4689, 30.6084, 28.5427};
 			SECTION("Non-empty sequence of points") {
@@ -164,8 +164,8 @@ const lest::test specification[] = {
 			}
 
 			SECTION("Empty sequence of points returns an empty vector") {
-				std::vector<std::array<double, 2>> points;
-				std::array<double, 2> center{5, 4};
+                std::vector<std::vector<double>> points;
+                std::vector<double> center{5, 4};
 
 				std::vector<double> empty;
 				std::vector<double> out = dkm::dist_to_center(points, center);
@@ -177,7 +177,7 @@ const lest::test specification[] = {
 
 	CASE("Test dkm::sum_dist",) {
 		SETUP() {
-			std::vector<std::array<double, 2>> points{
+            std::vector<std::vector<double>> points{
 				{1,    5},
 				{2.2,  3},
 				{8,    12},
@@ -186,7 +186,7 @@ const lest::test specification[] = {
 				{1,    1}
 			};
 			std::vector<double> out(points.size());
-			std::array<double, 2> center{17.2, 24.5};
+            std::vector<double> center{17.2, 24.5};
 
 			std::vector<double> res{25.3513, 26.2154, 15.5206, 20.4689, 30.6084, 28.5427};
 			SECTION("Non-empty sequence of points") {
@@ -195,8 +195,8 @@ const lest::test specification[] = {
 			}
 
 			SECTION("Empty sequence of points returns 0") {
-				std::vector<std::array<double, 2>> points;
-				std::array<double, 2> center{5, 4};
+                std::vector<std::vector<double>> points;
+                std::vector<double> center{5, 4};
 
 				EXPECT(dkm::sum_dist(points, center) == 0);
 			}
@@ -205,7 +205,7 @@ const lest::test specification[] = {
 
 	CASE("Test dkm::means_inertia",) {
 		SETUP() {
-			std::vector<std::array<double, 2>> points{
+            std::vector<std::vector<double>> points{
 				{66.01742226,  48.70477854},
 				{62.30094932, 108.44049522},
 				{39.60740312,  12.07668535},
@@ -227,7 +227,7 @@ const lest::test specification[] = {
 				{25.31232669,  35.88059477},
 				{57.67046396,  35.05019015}
 			};
-			std::vector<std::array<double, 2>> centroids{
+            std::vector<std::vector<double>> centroids{
 				{10, 10},
 				{20, 20},
 				{40, 30}
@@ -238,7 +238,7 @@ const lest::test specification[] = {
 			};
 			uint32_t k = 3;
 			SECTION("Non-empty set of points, fixed 3 clusters") {
-				std::tuple<std::vector<std::array<double, 2>>, std::vector<uint32_t>> means{centroids, labels};
+                std::tuple<std::vector<std::vector<double>>, std::vector<uint32_t>> means{centroids, labels};
 
 				double inertia = 0;
 				for (size_t i = 0; i < labels.size(); ++i) {
@@ -251,14 +251,14 @@ const lest::test specification[] = {
 			}
 
 			SECTION("Empty set of points should give 0 inertia") {
-				std::vector<std::array<double, 2>> points;
-				std::tuple<std::vector<std::array<double, 2>>, std::vector<uint32_t>> means;
+                std::vector<std::vector<double>> points;
+                std::tuple<std::vector<std::vector<double>>, std::vector<uint32_t>> means;
 
 				EXPECT(dkm::means_inertia(points, means, k) == lest::approx(0));
 			}
 
 			SECTION() {
-				std::vector<std::array<double, 2>> data{
+                std::vector<std::vector<double>> data{
 					{1, 1},
 						{2, 2},
 						{1200, 1200},
@@ -273,7 +273,7 @@ const lest::test specification[] = {
 	},
 	CASE("Test dkm::get_best_means",) {
 		SETUP() {
-			std::vector<std::array<double, 2>> points{
+            std::vector<std::vector<double>> points{
 				{8,  8},
 				{9, 9},
 				{11,  11},
@@ -285,7 +285,7 @@ const lest::test specification[] = {
 				{39,  39},
 				{41,  41},
 			};
-			std::vector<std::array<double, 2>> centroids{
+            std::vector<std::vector<double>> centroids{
 				{10, 10},
 				{20, 20},
 				{40, 40}
@@ -294,7 +294,7 @@ const lest::test specification[] = {
 			uint32_t k = 3;
 			SECTION("Test if we get the clustering with the least inertia") {
 				auto means = dkm::get_best_means(points, k, 20);
-				std::vector<std::array<double, 2>> returned_centroids;
+                std::vector<std::vector<double>> returned_centroids;
 				std::vector<uint32_t> returned_labels;
 				std::tie(returned_centroids, returned_labels) = means;
 				// every point is assigned to the same cluster center

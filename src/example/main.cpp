@@ -8,8 +8,8 @@
 #endif
 
 int main() {
-	std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
-	auto cluster_data = dkm::kmeans_lloyd(data, 2);
+	std::vector<std::vector<float>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
+	auto cluster_data = dkm::kmeans_lloyd<float>(data, 2);
 
 	std::cout << "Means:" << std::endl;
 	for (const auto& mean : std::get<0>(cluster_data)) {

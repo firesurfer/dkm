@@ -30,7 +30,7 @@ std::vector<std::string> split_commas(const std::string& line) {
 }
 
 template <typename T, size_t N>
-void print_result_dkm(std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>& result) {
+void print_result_dkm(std::tuple<std::vector<std::vector<T>>, std::vector<uint32_t>>& result) {
 	std::cout << "centers: ";
 	for (const auto& c : std::get<0>(result)) {
 		std::cout << "(";
@@ -60,13 +60,14 @@ cv::Mat load_opencv(const std::string& path) {
 }
 
 template <typename T, size_t N>
-std::vector<std::array<T, N>> load_dkm(const std::string& path) {
+std::vector<std::vector<T>> load_dkm(const std::string& path) {
 	std::ifstream file(path);
-	std::vector<std::array<T, N>> data;
+    std::vector<std::vector<T>> data;
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
 		auto split = split_commas(*it);
 		assert(split.size() == N); // number of values must match rows in file
-		std::array<T, N> row;
+        std::vector<T> row;
+        row.resize(N);
 		std::transform(split.begin(), split.end(), row.begin(), [](const std::string& in) -> T {
 			return static_cast<T>(std::stod(in));
 		});
@@ -91,7 +92,7 @@ std::chrono::duration<double> profile_opencv(const cv::Mat& data, int k) {
 }
 
 template <typename T, size_t N>
-std::chrono::duration<double> profile_dkm(const std::vector<std::array<T, N>>& data, int k) {
+std::chrono::duration<double> profile_dkm(const std::vector<std::vector<T>>& data, int k) {
 	auto start = std::chrono::high_resolution_clock::now();
 	// run the bench 10 times and take the average
 	for (int i = 0; i < 10; ++i) {
@@ -104,7 +105,7 @@ std::chrono::duration<double> profile_dkm(const std::vector<std::array<T, N>>& d
 }
 
 template <typename T, size_t N>
-std::chrono::duration<double> profile_dkm_par(const std::vector<std::array<T, N>>& data, int k) {
+std::chrono::duration<double> profile_dkm_par(const std::vector<std::vector<T>>& data, int k) {
 	auto start = std::chrono::high_resolution_clock::now();
 	// run the bench 10 times and take the average
 	for (int i = 0; i < 10; ++i) {
@@ -126,8 +127,8 @@ void bench_dataset(const std::string& path, uint32_t k) {
 	}
 
 	auto dkm_data = load_dkm<T, N>(path);
-	auto time_dkm = profile_dkm(dkm_data, k);
-	auto time_dkm_par = profile_dkm_par(dkm_data, k);
+    auto time_dkm = profile_dkm<T,N>(dkm_data, k);
+    auto time_dkm_par = profile_dkm_par<T,N>(dkm_data, k);
 	std::cout << "\n";
 	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count()
 			  << "ms" << std::endl;
@@ -136,10 +137,10 @@ void bench_dataset(const std::string& path, uint32_t k) {
 	std::cout << "OpenCV: ";
 	if (N == 2) {
 		std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms";
-	} else {
+    } else {
 		std::cout << "---";
 	}
-	std::cout << "\n" << std::endl;
+    std::cout << "\n" << std::endl;
 }
 
 int main() {

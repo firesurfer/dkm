@@ -19,10 +19,10 @@ namespace dkm {
  *
  * @return std::vector<T> containing distance of each point to the center.
  */
-template <typename T, size_t N>
-std::vector<T> dist_to_center(const std::vector<std::array<T, N>>& points, const std::array<T, N>& center) {
+template <typename T>
+std::vector<T> dist_to_center(const std::vector<std::vector<T>>& points, const std::vector<T>& center) {
 	std::vector<T> result(points.size());
-	std::transform(points.begin(), points.end(), result.begin(), [&center](const std::array<T, N>& p) {
+    std::transform(points.begin(), points.end(), result.begin(), [&center](const std::vector<T>& p) {
 		return details::distance(p, center);
 	});
 	return result;
@@ -37,8 +37,8 @@ std::vector<T> dist_to_center(const std::vector<std::array<T, N>>& points, const
  *
  * @return Sum of distances of each point to the center.
  */
-template <typename T, size_t N>
-T sum_dist(const std::vector<std::array<T, N>>& points, const std::array<T, N>& center) {
+template <typename T>
+T sum_dist(const std::vector<std::vector<T>>& points, const std::vector<T>& center) {
 	std::vector<T> distances = dist_to_center(points, center);
 	return std::accumulate(distances.begin(), distances.end(), T());
 }
@@ -54,12 +54,12 @@ T sum_dist(const std::vector<std::array<T, N>>& points, const std::array<T, N>& 
  *
  * @return Sequence of points that all belong to the cluster with the given label.
  */
-template <typename T, size_t N>
-std::vector<std::array<T, N>> get_cluster(
-	const std::vector<std::array<T, N>>& points, const std::vector<uint32_t>& labels, const uint32_t label) {
+template <typename T>
+std::vector<std::vector<T>> get_cluster(
+    const std::vector<std::vector<T>>& points, const std::vector<uint32_t>& labels, const uint32_t label) {
 	assert(points.size() == labels.size() && "Points and labels have different sizes");
 	// construct the cluster
-	std::vector<std::array<T, N>> cluster;
+    std::vector<std::vector<T>> cluster;
 	for (size_t point_index = 0; point_index < points.size(); ++point_index) {
 		if (labels[point_index] == label) {
 			cluster.push_back(points[point_index]);
@@ -79,11 +79,11 @@ std::vector<std::array<T, N>> get_cluster(
  *
  * @return Total inertia of the given clustering.
  */
-template <typename T, size_t N>
-T means_inertia(const std::vector<std::array<T, N>>& points,
-	const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>& means,
+template <typename T>
+T means_inertia(const std::vector<std::vector<T>>& points,
+    const std::tuple<std::vector<std::vector<T>>, std::vector<uint32_t>>& means,
 	uint32_t k) {
-	std::vector<std::array<T, N>> centroids;
+    std::vector<std::vector<T>> centroids;
 	std::vector<uint32_t> labels;
 	std::tie(centroids, labels) = means;
 
@@ -106,9 +106,9 @@ T means_inertia(const std::vector<std::array<T, N>>& points,
  *
  * @return Clustering with the lowest inertia.
  */
-template <typename T, size_t N>
-std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> get_best_means(
-	const std::vector<std::array<T, N>>& points, uint32_t k, uint32_t n_init = 10) {
+template <typename T>
+std::tuple<std::vector<std::vector<T>>, std::vector<uint32_t>> get_best_means(
+    const std::vector<std::vector<T>>& points, uint32_t k, uint32_t n_init = 10) {
 	auto best_means = kmeans_lloyd(points, k);
 	auto best_inertia = means_inertia(points, best_means, k);
 
